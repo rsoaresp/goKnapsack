@@ -70,6 +70,8 @@ func (k *Knapsack) unboundedKP(limit int) ([][]int, []int) {
 		pos, profit[w] = extrema(temp, "max")
 		if w - k.weights[pos] >= 0 {		
 			items[w] = append(items[w - k.weights[pos]], k.weights[pos])
+		} else {
+			item[w] = append(items[w-1], 0)
 		}
 	}
 
