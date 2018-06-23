@@ -68,7 +68,9 @@ func (k *Knapsack) unboundedKP(limit int) ([][]int, []int) {
 		// one just found plus the optimal set with total capacity
 		// reduced by the weight of the chosen item.
 		pos, profit[w] = extrema(temp, "max")
-		items[w] = append(items[w - k.weights[pos]], k.weights[pos])
+		if w - k.weights[pos] >= 0 {		
+			items[w] = append(items[w - k.weights[pos]], k.weights[pos])
+		}
 	}
 
 	return items, profit
