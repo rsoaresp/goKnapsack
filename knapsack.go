@@ -2,7 +2,6 @@ package main
 
 import "fmt"
 
-
 // A structure to hold the properties the knapsack
 // problem, the values and weights of the products.
 type Knapsack struct {
@@ -42,13 +41,17 @@ func extrema(array []int, op string) (int, int) {
 }
 
 
-
 // The unbounded knapsack problem using a dynamic programming algorithm.
-// More information at https://en.wikipedia.org/wiki/Knapsack_problem 
-func (k *Knapsack) unboundedKP(limit int) ([]int, []int) {
+// More information at https://en.wikipedia.org/wiki/Knapsack_problem
+func (k *Knapsack) unboundedKP(limit int) ([][]int, []int) {
 
-	items := make([]int, limit+1)
 	profit := make([]int, limit+1)
+
+	// items is a 2D slice that will contain the set of items that must
+	// be included in the knapsack to optimize the profit at weight w.
+	var pos int = 0
+	items := make([][]int, limit+1)
+	items[0] = make([]int, 1)
 
 	for w := 1; w <= limit; w++ {
 
@@ -56,18 +59,25 @@ func (k *Knapsack) unboundedKP(limit int) ([]int, []int) {
 
 		for i, itemWeight := range k.weights {
 			if itemWeight <= w {
-				temp[i] = k.values[i] + profit[w - k.weights[i]]
+				temp[i] = k.values[i] + profit[w-k.weights[i]]
 			}
 		}
 
-		items[w], profit[w] = extrema(temp, "max")
+		// We look for the combination that optimizes the profit
+		// for a knapsack with weight w. The list of items is the
+		// one just found plus the optimal set with total capacity
+		// reduced by the weight of the chosen item.
+		pos, profit[w] = extrema(temp, "max")
+		items[w] = append(items[w - k.weights[pos]], k.weights[pos])
 	}
 
 	return items, profit
 }
 
-func main() {
 
+func main() {
+	// An example of how to call the knapsack problem.
+	// We create the structure and call the method.
 	w := [3]int{1, 2, 3}
 	k := [3]int{7, 10, 21}
 
