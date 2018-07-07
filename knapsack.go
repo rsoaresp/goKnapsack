@@ -2,7 +2,7 @@ package main
 
 import "fmt"
 
-// A structure to hold the properties the knapsack
+// Knapsack structure holds the properties the knapsack
 // problem, the values and weights of the products.
 type Knapsack struct {
 	weights []int
@@ -10,68 +10,36 @@ type Knapsack struct {
 }
 
 
-// The maximum or minimum element of a slice, returning
-// its position and the corresponding value.
-func extrema(array []int, op string) (int, int) {
-
-	var pos int = 0
-	var ext int = array[0]
-
-	var opString string = op[0:3]
-
-	if opString == "min" {
-		for i, value := range array {
-			if value <= ext {
-				ext = value
-				pos = i
-			}
-		}
-	} else if opString == "max" {
-		for i, value := range array {
-			if value >= ext {
-				ext = value
-				pos = i
-			}
-		}
-	} else {
-		panic("Operation unknow")
-	}
-
-	return pos, ext
+// Size returns the number of elements of the problem.
+func (k *Knapsack) Size() int {
+	return len(k.weights)
 }
 
 
-// The unbounded knapsack problem using a dynamic programming algorithm.
-// More information at https://en.wikipedia.org/wiki/Knapsack_problem
-func (k *Knapsack) unboundedKP(limit int) ([][]int, []int) {
+// Unbounded solves the knapsack problem when there is no limit
+// on the numbers of a particular item to be carried.
+// It does so using the well know algorithm of dynamic programming
+// stated in https://en.wikipedia.org/wiki/Knapsack_problem
+func (k *Knapsack) Unbounded(limit int) ([][]int, []int) {
+
+	var temp int = -1
 
 	profit := make([]int, limit+1)
 
-	// items is a 2D slice that will contain the set of items that must
-	// be included in the knapsack to optimize the profit at weight w.
-	var pos int = 0
 	items := make([][]int, limit+1)
-	items[0] = make([]int, 1)
+	for i := 1; i <= limit; i++ {
+		items[i] = make([]int, 0)
+	}
 
 	for w := 1; w <= limit; w++ {
-
-		temp := make([]int, w+1)
-
 		for i, itemWeight := range k.weights {
 			if itemWeight <= w {
-				temp[i] = k.values[i] + profit[w-k.weights[i]]
+				temp = k.values[i] + profit[w-itemWeight]
+				if temp > profit[w] {
+					profit[w] = temp
+					items[w] = append(items[w-itemWeight], itemWeight)
+				}
 			}
-		}
-
-		// We look for the combination that optimizes the profit
-		// for a knapsack with weight w. The list of items is the
-		// one just found plus the optimal set with total capacity
-		// reduced by the weight of the chosen item.
-		pos, profit[w] = extrema(temp, "max")
-		if w - k.weights[pos] >= 0 {		
-			items[w] = append(items[w - k.weights[pos]], k.weights[pos])
-		} else {
-			item[w] = append(items[w-1], 0)
 		}
 	}
 
@@ -79,16 +47,66 @@ func (k *Knapsack) unboundedKP(limit int) ([][]int, []int) {
 }
 
 
+// Bounded solves the knapsack problem when only one instance
+// if each item can be carried.
+func (k *Knapsack) Bounded(limit int) ([][][]int, [][]int) {
+
+	var temp int = -1
+
+	profit := make([][]int, k.Size()+1)
+	for i := range profit {
+		profit[i] = make([]int, limit+1)
+	}
+
+	// In order to know which items must be carried for
+	// the combinations of total weight and value we must
+	// have a list for each pair.
+	items := make([][][]int, k.Size()+1)
+	for i := 0; i < k.Size()+1; i++ {
+		items[i] = make([][]int, limit+1)
+		for j:=0; j < limit+1; j++ {
+			items[i][j] = make([]int, 0)
+		}
+	}
+
+
+	for i := 1; i < k.Size()+1; i++ {
+
+		value := k.values[i-1]		
+		weight := k.weights[i-1]
+
+		for w := 0; w <= limit; w ++ {
+
+			items[i][w] = items[i-1][w]
+
+			if weight > w {
+				profit[i][w] = profit[i-1][w]
+			} else {
+				temp = profit[i-1][w-weight] + value
+				if temp > profit[i-1][w] {
+					profit[i][w] = temp
+					items[i][w] = append(items[i-1][w-weight], weight)
+				} else {
+					profit[i][w] = profit[i-1][w]
+				}
+			}
+		}
+	}
+
+    	return items, profit
+}
+
+
 func main() {
 	// An example of how to call the knapsack problem.
 	// We create the structure and call the method.
-	w := [3]int{1, 2, 3}
-	k := [3]int{7, 10, 21}
+	w := [4]int{5, 4, 6, 3}
+	k := [4]int{10, 40, 30, 50}
 
 	res := Knapsack{weights: w[:], values: k[:]}
 
-	i, m := res.unboundedKP(5)
-	fmt.Println(i)
-	fmt.Println(m)
+	a,b := res.Bounded(10)
+	fmt.Println("--------------")
+	fmt.Println(a,b)
 
 }
