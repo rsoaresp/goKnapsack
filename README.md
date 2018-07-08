@@ -12,7 +12,12 @@ of each element to be included).
 
 You need the Go compiler found at [Go](https://golang.org/) (where you can try it online!) 
 
-An overview of the algorithm can be found at [wikipedia](https://en.wikipedia.org/wiki/Knapsack_problem)
+### About the problem
+
+An overview of the algorithms is avaiable at [wikipedia](https://en.wikipedia.org/wiki/Knapsack_problem) 
+and a very nice colection of datasets to play with can be found at [John Burkardt](https://people.sc.fsu.edu/~jburkardt/datasets/knapsack_01/knapsack_01.html)'s page.
+
+
 
 ## Author
 * Rafael Soares Pinto (rsoaresp@gmail.com)
